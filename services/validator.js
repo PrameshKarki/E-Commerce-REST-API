@@ -31,8 +31,14 @@ const loginValidator = [body("email").exists().withMessage("Email is required").
 body("password").exists().withMessage("Password is required.").isStrongPassword().withMessage("Invalid credentials")]
 
 
-const refreshTokenValidator=[body("refresh_token").exists().withMessage("Refresh token is required.").isString().isLength({min:5}).withMessage("Invalid Refresh Token.")]
+const refreshTokenValidator = [body("refresh_token").exists().withMessage("Refresh token is required.").isString().isLength({ min: 5 }).withMessage("Invalid Refresh Token.")]
+
+const productValidator = [body("name").exists().withMessage("Product name is required.").isAlpha("en-US", { ignore: " " }).withMessage("Invalid name").isLength({min:2,max:20}).withMessage("Invalid name").trim(),
+body("price").exists().withMessage("Product price is required").isNumeric("en-US",{no_symbols:false}).withMessage("Invalid price").trim(),
+body("size").exists().withMessage("Product size is required").isAlpha().isLength({min:1,max:5}).withMessage("Invalid size").trim()
+]
 
 exports.registerValidator = registerValidator;
 exports.loginValidator = loginValidator;
-exports.refreshTokenValidator =refreshTokenValidator;
+exports.refreshTokenValidator = refreshTokenValidator;
+exports.productValidator = productValidator;

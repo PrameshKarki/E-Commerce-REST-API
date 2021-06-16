@@ -5,6 +5,9 @@ const express=require("express");
 const mongoose=require("mongoose");
 const dotenv=require("dotenv");
 
+// *GLOBAL VARIABLE
+global.appRoot=path.resolve(__dirname);
+
 // *Import configuration
 dotenv.config({path:"env/config.env"});
 
@@ -21,6 +24,7 @@ const app=express();
 app.use(express.static(path.join(__dirname,"public")));
 
 // * JSON body parser
+app.use(express.urlencoded({extended:false}));
 app.use(express.json());
 
 // *Use routes
