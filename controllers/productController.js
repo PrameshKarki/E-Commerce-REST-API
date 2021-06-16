@@ -14,7 +14,7 @@ const { validationResult } = require("express-validator");
 exports.postAddProduct = async (req, res, next) => {
     // *Check validation
     const errors = validationResult(req);
-    const file=req.file;
+    const file = req.file;
     if (errors.isEmpty()) {
         // TODO:Proceed further logic
         const body = JSON.parse(JSON.stringify(req.body));
@@ -48,5 +48,57 @@ exports.postAddProduct = async (req, res, next) => {
         return res.status(422).json(err);
     }
 
+}
+
+exports.putUpdateProduct = async (req, res, next) => {
+    // *Get productID from params
+    const _id = req.params.productID;
+
+    // *Get newly uploaded image is exist
+    const file = req.file;
+
+    // *Validation result
+    const errors = validationResult(req);
+    if (errors.isEmpty()) {
+        // TODO:Proceed further operation
+        const { name, price, size } = JSON.parse(JSON.stringify(req.body));
+        // *Fetch old product details
+        const product = await Product.findById({ _id });
+        if (product) {
+            // *Check if there is new image or not,if there remove oldOne
+            if (file) {
+                fs.unlink(`${appRoot}/${product.image}`, err => {
+                    if (err) {
+                        return next(CustomErrorHandler.serverError());
+                    }
+                })
+                product.image = file.path;
+            }
+            product.name = name;
+            product.price = price;
+            product.size = size;
+            let status = await product.save();
+            res.json(status);
+
+        } else {
+            return next(CustomErrorHandler.notFound("Product not found!"));
+        }
+    } else {
+        if (file) {
+
+            // !If there is a newly uploaded image,then remove it
+            fs.unlink(`${appRoot}/${file.path}`, err => {
+                if (err) {
+                    return next(CustomErrorHandler.serverError());
+                }
+
+
+            })
+        }
+        const error = {
+            message: errors.array()[0].msg
+        }
+        return res.status(422).json(error);
+    }
 }
 

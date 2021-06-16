@@ -1,30 +1,32 @@
 // * Import modules
-const path=require("path");
+const path = require("path");
 
-const express=require("express");
+const express = require("express");
 
 // *Import router
-const router=express.Router();
+const router = express.Router();
 
 // *Import controllers
-const authController=require("../controllers/auth/authController");
-const userController=require("../controllers/userController");
-const refreshController=require("../controllers/refreshController");
-const productController=require("../controllers/productController");
+const authController = require("../controllers/auth/authController");
+const userController = require("../controllers/userController");
+const refreshController = require("../controllers/refreshController");
+const productController = require("../controllers/productController");
 
 // *Import middleware
-const auth=require("../middlewares/auth");
+const auth = require("../middlewares/auth");
+const ensureAdmin = require("../middlewares/ensureAdmin");
+
 // *Import multer
-const multer=require("multer");
+const multer = require("multer");
 
 // *Configure multer
-const storage=multer.diskStorage({
-    destination:(req,file,cb)=>{
-        cb(null,"uploads/")
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/")
     },
-    filename:(req,file,cb)=>{
-        const uniqueName=`${Date.now()}-${Math.random() * 1E9}${path.extname(file.originalname)}`
-        cb(null,uniqueName);
+    filename: (req, file, cb) => {
+        const uniqueName = `${Date.now()}-${Math.random() * 1E9}${path.extname(file.originalname)}`
+        cb(null, uniqueName);
     }
 })
 
@@ -32,37 +34,47 @@ const fileFilter = (req, file, cb) => {
     if (file.mimetype === "image/jpeg" || file.mimetype === "image/png" || file.mimetype === "image/JPG") {
         cb(null, true);
     } else {
-        cb("Invalid file format",false);
+        cb("Invalid file format", false);
     }
 }
 
-const upload=multer({storage:storage,fileFilter:fileFilter,limits:{fileSize:1000000*5}}); //!5 mb
+const upload = multer({ storage: storage, fileFilter: fileFilter, limits: { fileSize: 1000000 * 5 } }); //!5 mb
 
 
 // *Import validators
-const validator=require("../services/validator");
+const validator = require("../services/validator");
 // *Custom error handler
 const CustomErrorHandler = require("../services/CustomErrorHandler");
 
-router.post("/register",validator.registerValidator,authController.postRegister);
+router.post("/register", validator.registerValidator, authController.postRegister);
 
-router.post("/login",validator.loginValidator,authController.postLogIn);
+router.post("/login", validator.loginValidator, authController.postLogIn);
 
-router.get("/me",auth,userController.getMe);
+router.get("/me", auth, userController.getMe);
 
-router.post("/refresh",validator.refreshTokenValidator,refreshController.postRefresh);
+router.post("/refresh", auth, validator.refreshTokenValidator, refreshController.postRefresh);
 
-router.post("/logout",auth,validator.refreshTokenValidator,authController.postLogOut);
+router.post("/logout", auth, validator.refreshTokenValidator, authController.postLogOut);
 
-router.post("/products",auth,(req,res,next)=>{
-    const singleUpload=upload.single("image");
-    singleUpload(req,res,next,(error)=>{
-        if(error){
+router.post("/products", auth, ensureAdmin, (req, res, next) => {
+    const singleUpload = upload.single("image");
+    singleUpload(req, res, next, (error) => {
+        if (error) {
             return next(CustomErrorHandler.serverError());
         }
         next();
     })
-},validator.productValidator,productController.postAddProduct);
+}, validator.productValidator, productController.postAddProduct);
+
+router.put("/products/:productID", auth, ensureAdmin, (req, res, next) => {
+    const singleUpload = upload.single("image");
+    singleUpload(req, res, next, (error) => {
+        if (error) {
+            return next(CustomErrorHandler.serverError());
+        }
+        next();
+    })
+}, validator.productValidator, productController.putUpdateProduct)
 
 // *Export router
-module.exports=router;
+module.exports = router;
