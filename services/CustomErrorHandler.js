@@ -7,6 +7,13 @@ class CustomErrorHandler extends Error{
     static invalidCredentials(message="Invalid credentials"){
         return new CustomErrorHandler(401,message);
     }
+    static unauthorize(message="Unauthorized!"){
+        return new CustomErrorHandler(401,message);
+    }
+    static notFound(message="Not Found"){
+        return new CustomErrorHandler(404,message);
+
+    }
 }
 
 module.exports=CustomErrorHandler;
