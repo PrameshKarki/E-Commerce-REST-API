@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 
 // *Import models
 const User = require("../../models/User");
+const RefreshToken=require("../../models/RefreshToken");
 
 // *Import JWT Service
 const JWTService=require("../../services/JWTService");
@@ -32,6 +33,7 @@ exports.postRegister = async (req, res, next) => {
         // *Prepare model
         const { name, email } = req.body;
         let access_token;
+        let refresh_token;
         try {
             const result = await User.create({
                 name,
@@ -41,12 +43,17 @@ exports.postRegister = async (req, res, next) => {
 
             // *Token
             access_token=JWTService.sign({_id:result._id,role:result.role});
+            refresh_token=JWTService.sign({_id:result._id,role:result.role},"1y",process.env.REFRESH_TOKEN);
+
+            // *Database WhiteList
+            await RefreshToken.create({token:refresh_token});
+
 
         } catch (err) {
             return next(err);
         }
         // *Return response
-        res.json({access_token});
+        res.json({access_token,refresh_token});
     } else {
         const err = {
             message: errors.array()[0].msg
@@ -59,7 +66,7 @@ exports.postRegister = async (req, res, next) => {
 // *Method for login
 exports.postLogIn=async(req,res,next)=>{
     const errors = validationResult(req);
-    let access_token;
+    let access_token,refresh_token;
     if(errors.isEmpty()){
         try{
             const user=await User.findOne({email:req.body.email});
@@ -70,7 +77,11 @@ exports.postLogIn=async(req,res,next)=>{
             // *Compare password
             const doMatch=await bcrypt.compare(req.body.password,user.password);
             if(doMatch){
-                access_token=JWTService.sign({_id: user._id,role:user.role})
+                access_token=JWTService.sign({_id: user._id,role:user.role});
+                refresh_token=JWTService.sign({_id: user._id,role:user.role},"1y",process.env.REFRESH_SECRET);
+
+                // *Database Whitelist
+                await RefreshToken.create({token:refresh_token});
             }else{
                 return next(CustomErrorHandler.invalidCredentials());
             }
@@ -78,7 +89,7 @@ exports.postLogIn=async(req,res,next)=>{
         }catch(err){
             return next(err);
         }
-        return res.json({access_token});
+        return res.json({access_token,refresh_token});
 
     }else{
         const err = {

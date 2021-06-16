@@ -31,5 +31,8 @@ const loginValidator = [body("email").exists().withMessage("Email is required").
 body("password").exists().withMessage("Password is required.").isStrongPassword().withMessage("Invalid credentials")]
 
 
+const refreshTokenValidator=[body("refresh_token").exists().withMessage("Refresh token is required.").isString().isLength({min:5}).withMessage("Invalid Refresh Token.")]
+
 exports.registerValidator = registerValidator;
 exports.loginValidator = loginValidator;
+exports.refreshTokenValidator =refreshTokenValidator;
