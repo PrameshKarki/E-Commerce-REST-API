@@ -4,8 +4,8 @@ class CustomErrorHandler extends Error{
         this.status=status;
         this.message=message;
     }
-    static alreadyExist(message){
-        return new CustomErrorHandler(409,message);
+    static invalidCredentials(message="Invalid credentials"){
+        return new CustomErrorHandler(401,message);
     }
 }
 

@@ -9,7 +9,9 @@ const JWTService=require("../../services/JWTService");
 
 // *Import modules
 const bcrypt = require("bcryptjs");
+const CustomErrorHandler = require("../../services/CustomErrorHandler");
 
+// *Method for register
 exports.postRegister = async (req, res, next) => {
     // TODO:
     // *Validate the request
@@ -52,4 +54,36 @@ exports.postRegister = async (req, res, next) => {
         return res.status(422).json(err);
     }
 
+}
+
+// *Method for login
+exports.postLogIn=async(req,res,next)=>{
+    const errors = validationResult(req);
+    let access_token;
+    if(errors.isEmpty()){
+        try{
+            const user=await User.findOne({email:req.body.email});
+            if(!user){
+                return next(CustomErrorHandler.invalidCredentials());
+            }
+
+            // *Compare password
+            const doMatch=await bcrypt.compare(req.body.password,user.password);
+            if(doMatch){
+                access_token=JWTService.sign({_id: user._id,role:user.role})
+            }else{
+                return next(CustomErrorHandler.invalidCredentials());
+            }
+
+        }catch(err){
+            return next(err);
+        }
+        return res.json({access_token});
+
+    }else{
+        const err = {
+            message: errors.array()[0].msg
+        }
+        return res.status(422).json(err);
+    }
 }

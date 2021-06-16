@@ -12,5 +12,7 @@ const validator=require("../services/validator");
 
 router.post("/register",validator.registerValidator,authController.postRegister);
 
+router.post("/login",validator.loginValidator,authController.postLogIn);
+
 // *Export router
 module.exports=router;

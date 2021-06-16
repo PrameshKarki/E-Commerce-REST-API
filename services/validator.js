@@ -19,7 +19,7 @@ body("email").exists().withMessage("Email is required.").isEmail().withMessage("
     }
 }).normalizeEmail(),
 body("password").exists().withMessage("Password is required.").isStrongPassword().withMessage("Weak password"),
-body("confirmPassword").exists().withMessage("Confirm password is required").custom((value,{req}) => {
+body("confirmPassword").exists().withMessage("Confirm password is required").custom((value, { req }) => {
     if (value === req.body.password)
         return true;
     else
@@ -27,4 +27,9 @@ body("confirmPassword").exists().withMessage("Confirm password is required").cus
 }).withMessage("Password doesn't match")
 ];
 
-exports.registerValidator=registerValidator;
+const loginValidator = [body("email").exists().withMessage("Email is required").isEmail().withMessage("Invalid email format").normalizeEmail(),
+body("password").exists().withMessage("Password is required.").isStrongPassword().withMessage("Invalid credentials")]
+
+
+exports.registerValidator = registerValidator;
+exports.loginValidator = loginValidator;
