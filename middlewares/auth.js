@@ -5,7 +5,6 @@ const auth=async(req,res,next)=>{
 
     // *Get Header
     let authHeader=req.headers.authorization;
-    
     if(!authHeader){
         return next(CustomErrorHandler.unauthorize());
     }

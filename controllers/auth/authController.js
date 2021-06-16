@@ -98,3 +98,24 @@ exports.postLogIn=async(req,res,next)=>{
         return res.status(422).json(err);
     }
 }
+
+
+exports.postLogOut=async (req,res,next)=>{
+    // *Check validation result
+    const errors=validationResult(req);
+
+    if(errors.isEmpty()){
+        // *Proceed further logic
+
+        // *Remove refresh token from database
+        let status=await RefreshToken.deleteOne({token:req.body.refresh_token});
+
+        // *Send responses back
+        res.json({status:1});
+    }else{
+        const err = {
+            message: errors.array()[0].msg
+        }
+        return res.status(422).json(err);
+    }
+}

@@ -23,5 +23,7 @@ router.get("/me",auth,userController.getMe);
 
 router.post("/refresh",validator.refreshTokenValidator,refreshController.postRefresh);
 
+router.post("/logout",auth,validator.refreshTokenValidator,authController.postLogOut);
+
 // *Export router
 module.exports=router;
