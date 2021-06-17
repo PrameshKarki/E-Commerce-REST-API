@@ -102,3 +102,54 @@ exports.putUpdateProduct = async (req, res, next) => {
     }
 }
 
+// *Method to fetch all the products from the database
+exports.getProducts=async(req,res,next)=>{
+    try {
+        const products=await Product.find().select("-createdAt -updatedAt -__v");
+        if(products.length>0){
+            return res.json(products);
+        }else{
+            return next(CustomErrorHandler.notFound("Products not found!"));
+        }
+        
+    } catch (error) {
+        return next(CustomErrorHandler.serverError());
+    }
+}
+
+// *Method to fetch single productDetails from the database
+exports.getProduct=async (req,res,next)=>{
+    try {
+        const product=await Product.findOne({_id:req.params.productID}).select("-createdAt -updatedAt -__v");
+        if(product){
+            res.json(product);
+        }else{
+            return next(CustomErrorHandler.notFound("Product not found!"));
+        }
+        
+    } catch (error) {
+        console.log(error);
+        return next(CustomErrorHandler.serverError());
+    }
+}
+
+// *Method to delete product from the database
+exports.deleteProduct=async(req,res,next)=>{
+    try {
+        const document=await Product.findOneAndDelete().select("-createdAt -updatedAt -__v");
+        if(document){
+            // !Remove image from database too
+            fs.unlink(`${appRoot}/${document.image}`,(err)=>{
+                if(err){
+                    return next(CustomErrorHandler.serverError());
+                }
+                return res.json(document);
+            })
+
+        }else{
+            return next(CustomErrorHandler.notFound("Product not found!"));
+        }
+    } catch (error) {
+        return next(CustomErrorHandler.serverError());
+    }
+}

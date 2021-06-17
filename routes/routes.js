@@ -56,7 +56,7 @@ router.post("/refresh", auth, validator.refreshTokenValidator, refreshController
 
 router.post("/logout", auth, validator.refreshTokenValidator, authController.postLogOut);
 
-router.post("/products", auth, ensureAdmin, (req, res, next) => {
+router.post("/products", (req, res, next) => {
     const singleUpload = upload.single("image");
     singleUpload(req, res, next, (error) => {
         if (error) {
@@ -75,6 +75,14 @@ router.put("/products/:productID", auth, ensureAdmin, (req, res, next) => {
         next();
     })
 }, validator.productValidator, productController.putUpdateProduct)
+
+
+router.get("/products",productController.getProducts);
+// !Add Protected route
+router.get("/products/:productID",productController.getProduct);
+
+router.delete("/products",productController.deleteProduct);
+
 
 // *Export router
 module.exports = router;
