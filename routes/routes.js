@@ -78,10 +78,10 @@ router.put("/products/:productID", auth, ensureAdmin, (req, res, next) => {
 
 
 router.get("/products",productController.getProducts);
-// !Add Protected route
+
 router.get("/products/:productID",productController.getProduct);
 
-router.delete("/products",productController.deleteProduct);
+router.delete("/products",auth,ensureAdmin,productController.deleteProduct);
 
 
 // *Export router

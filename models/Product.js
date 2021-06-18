@@ -17,10 +17,14 @@ const productSchema = mongoose.Schema({
     },
     image:{
         type:String,
-        required:true
+        required:true,
+        get:(image)=>{
+            return `${process.env.APP_URL}/${image}`;
+        }
     }
+    
 
-},{timestamps:true});
+},{timestamps:true,toJSON:{getters:true},id:false});
 
 // *Export models
 module.exports=mongoose.model("Product",productSchema);

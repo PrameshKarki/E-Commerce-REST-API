@@ -21,7 +21,7 @@ const errorHandler=require("./middlewares/errorHandler");
 const app=express();
 
 // * Static Serving
-app.use(express.static(path.join(__dirname,"public")));
+app.use("/uploads",express.static("uploads"));
 
 // * JSON body parser
 app.use(express.urlencoded({extended:false}));

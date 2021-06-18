@@ -105,7 +105,7 @@ exports.putUpdateProduct = async (req, res, next) => {
 // *Method to fetch all the products from the database
 exports.getProducts=async(req,res,next)=>{
     try {
-        const products=await Product.find().select("-createdAt -updatedAt -__v");
+        const products=await Product.find().select("-createdAt -updatedAt -__v").sort({_id:-1});
         if(products.length>0){
             return res.json(products);
         }else{
@@ -139,7 +139,7 @@ exports.deleteProduct=async(req,res,next)=>{
         const document=await Product.findOneAndDelete().select("-createdAt -updatedAt -__v");
         if(document){
             // !Remove image from database too
-            fs.unlink(`${appRoot}/${document.image}`,(err)=>{
+            fs.unlink(`${appRoot}/${document._doc.image}`,(err)=>{
                 if(err){
                     return next(CustomErrorHandler.serverError());
                 }
@@ -153,3 +153,9 @@ exports.deleteProduct=async(req,res,next)=>{
         return next(CustomErrorHandler.serverError());
     }
 }
+
+// let formattedURL = url.format({
+//     protocol: req.protocol,
+//     host: req.get("host"),
+//     pathname: shortURL
+// })
